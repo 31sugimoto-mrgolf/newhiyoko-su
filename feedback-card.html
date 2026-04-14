@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<title>🐣 MRゴルフ フィードバックカード</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+/* ════════════════════════════════════════
+   RESET & BASE
+════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic UI', 'Meiryo', sans-serif;
+  background: #EDF3E6;
+  color: #2A3820;
+  min-height: 100vh;
+  padding-bottom: env(safe-area-inset-bottom);
+  font-size: 16px;
+  line-height: 1.5;
+}
+button, input, textarea, select { font-family: inherit; color: inherit; }
+button { cursor: pointer; }
+
+/* ════════════════════════════════════════
+   APP BAR + TABS
+════════════════════════════════════════ */
+.appbar {
+  background: #3D5C28;
+  padding: 10px 16px;
+  padding-top: calc(10px + env(safe-area-inset-top));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.appbar-icon { font-size: 22px; }
+.appbar-title { color: #fff; font-size: 15px; font-weight: 700; }
+.appbar-sub { color: rgba(255,255,255,0.6); font-size: 11px; margin-left: auto; }
+
+.tabbar {
+  background: #3D5C28;
+  display: flex;
+  padding: 0 8px;
+  gap: 2px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  position: sticky;
+  top: 54px;
+  z-index: 49;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.tab {
+  min-height: 44px;
+  padding: 10px 14px;
+  color: rgba(255,255,255,0.6);
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  background: none;
+  border-bottom: 3px solid transparent;
+  transition: color .2s, border-color .2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.tab.active { color: #fff; border-bottom-color: #8EC86A; }
+
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ════════════════════════════════════════
+   LAYOUT
+════════════════════════════════════════ */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 12px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; gap: 12px; padding: 10px; }
+}
+
+/* ════════════════════════════════════════
+   FORM COMMONS
+════════════════════════════════════════ */
+.formbox {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.form-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #3D5C28;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.txt-input, .num-input, .free-input, .settings-ta, .desc-input, .item-title-input, .icon-input, .name-input-s {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1.5px solid #C8DDB5;
+  border-radius: 10px;
+  font-size: 16px;
+  outline: none;
+  background: #fff;
+  transition: border-color .2s, background .2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.txt-input:focus, .num-input:focus, .free-input:focus,
+.settings-ta:focus, .desc-input:focus, .item-title-input:focus,
+.icon-input:focus, .name-input-s:focus {
+  border-color: #3D5C28;
+  background: #FAFCF7;
+}
+.free-input { min-height: 64px; resize: vertical; line-height: 1.6; }
+.name-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.sep { border: none; border-top: 1px solid #EAF0E3; margin: 14px 0; }
+
+/* ════════════════════════════════════════
+   FAST MODE — chips
+════════════════════════════════════════ */
+.cat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 6px 0 10px;
+}
+.cat-counter {
+  font-size: 12px;
+  color: #88A870;
+  background: #EBF4E0;
+  padding: 3px 9px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-bottom: 14px;
+}
+@media (max-width: 420px) {
+  .cat-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.cat-chip {
+  min-height: 62px;
+  border: 1.5px solid #C8DDB5;
+  border-radius: 11px;
+  padding: 6px 3px;
+  text-align: center;
+  background: #FAFCF7;
+  transition: all .15s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.cat-chip:active:not(.locked) { transform: scale(0.95); }
+.cat-chip.on {
+  border-color: #3D5C28;
+  background: #D8ECC5;
+  box-shadow: 0 2px 6px rgba(61,92,40,0.2);
+}
+.cat-chip.locked { opacity: 0.35; }
+.cat-chip.empty {
+  border-style: dashed;
+  border-color: #B8D4A0;
+  background: #F8FBF3;
+}
+.cat-chip.empty .cat-chip-name { color: #7A9060; font-weight: 600; }
+.cat-chip-icon { font-size: 20px; line-height: 1; }
+.cat-chip-name { font-size: 11px; font-weight: 700; color: #3D5C28; line-height: 1.15; }
+
+.cat-comment-block { margin-bottom: 12px; }
+.cat-comment-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #3D5C28;
+  background: #EBF4E0;
+  padding: 4px 10px;
+  border-radius: 6px;
+  display: inline-flex;
+  gap: 4px;
+  margin-bottom: 7px;
+}
+.preset-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 7px; }
+.preset-btn {
+  min-height: 44px;
+  text-align: left;
+  padding: 10px 12px;
+  background: #F6FBF0;
+  border: 1.5px solid #C8DDB5;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #2A3820;
+  transition: all .15s;
+  touch-action: manipulation;
+}
+.preset-btn:active { transform: scale(0.98); }
+.preset-btn.chosen {
+  background: #D0EBB8;
+  border-color: #3D5C28;
+  font-weight: 700;
+  color: #1A3010;
+}
+.preset-hint-empty {
+  font-size: 12px;
+  color: #A8BE98;
+  background: #F6FBF0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 7px;
+}
+.empty-msg {
+  font-size: 13px;
+  color: #B0C8A0;
+  text-align: center;
+  padding: 14px 0;
+}
+
+/* ════════════════════════════════════════
+   DETAIL MODE
+════════════════════════════════════════ */
+.section-form {
+  border: 1.5px solid #C8DEB5;
+  border-radius: 11px;
+  padding: 12px;
+  margin-bottom: 12px;
+  background: #FAFDF7;
+}
+.section-form-title {
+  color: #3D5C28;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  display: flex;
+  gap: 5px;
+}
+.quick-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.quick-btn {
+  min-height: 36px;
+  font-size: 13px;
+  padding: 7px 11px;
+  background: #e2edda;
+  color: #4a6a32;
+  border: 1px solid #b8d4a0;
+  border-radius: 16px;
+  touch-action: manipulation;
+  transition: background .15s, transform .1s;
+}
+.quick-btn:active { transform: scale(0.96); background: #c8ddb5; }
+.quick-empty-hint {
+  font-size: 12px;
+  color: #A8BE98;
+  padding: 6px 2px;
+  margin-bottom: 6px;
+}
+.item-form {
+  background: #fff;
+  border: 1px solid #dce8d0;
+  border-radius: 9px;
+  padding: 10px;
+  margin-bottom: 8px;
+}
+.item-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.check-icon { color: #3D5C28; font-size: 16px; flex-shrink: 0; }
+.item-title-input { flex: 1; padding: 10px 11px; font-size: 16px; }
+.btn-del {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  background: none;
+  border: 1px solid #e0b0b0;
+  color: #b04040;
+  border-radius: 8px;
+  font-size: 15px;
+}
+.btn-del:active { background: #fde8e8; }
+.desc-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 5px;
+  padding-left: 4px;
+}
+.arrow-icon { color: #7A9E6A; font-size: 14px; flex-shrink: 0; }
+.desc-input { flex: 1; padding: 9px 11px; font-size: 16px; border-radius: 7px; }
+.btn-del-sm {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: none;
+  color: #c08080;
+  font-size: 16px;
+}
+.btn-del-sm:active { color: #b04040; }
+.btn-add-desc {
+  min-height: 36px;
+  font-size: 13px;
+  padding: 6px 12px;
+  background: none;
+  color: #3D5C28;
+  border: 1px dashed #a0c088;
+  border-radius: 6px;
+  margin-left: 22px;
+  margin-top: 4px;
+}
+.btn-add-desc:active { background: #f0f8e8; }
+.btn-add-item {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px;
+  background: none;
+  border: 1.5px dashed #90be78;
+  color: #3D5C28;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+.btn-add-item:active { background: #eef6e6; }
+
+/* ════════════════════════════════════════
+   PREVIEW PANEL + ACTIONS
+════════════════════════════════════════ */
+.preview-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: sticky;
+  top: 108px;
+  align-self: start;
+}
+@media (max-width: 860px) {
+  .preview-col { position: static; }
+}
+.preview-col-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #3D5C28;
+  margin-bottom: 8px;
+  align-self: flex-start;
+}
+
+/* ---- CARD (export target) ---- */
+.card-wrap {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 6px 28px rgba(0,0,0,0.14);
+}
+.c-header {
+  background: linear-gradient(150deg, #3D5C28 0%, #5C7A42 100%);
+  padding: 20px 22px 16px;
+  position: relative;
+  overflow: hidden;
+}
+.c-header::after {
+  content: '⛳';
+  position: absolute;
+  right: 14px;
+  bottom: -6px;
+  font-size: 52px;
+  opacity: 0.13;
+  line-height: 1;
+}
+.c-event-tag {
+  font-size: 10px;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+.c-name {
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+}
+.c-subtitle {
+  font-size: 12px;
+  color: rgba(255,255,255,0.8);
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.c-body { padding: 12px 12px 4px; }
+.c-block {
+  border-radius: 12px;
+  padding: 11px 13px;
+  margin-bottom: 10px;
+}
+.c-block.common   { background: #F5FAF0; border: 1.5px solid #C0D8A8; }
+.c-block.personal { background: #FFFBF4; border: 1.5px solid #DFC090; }
+.c-block.nextstep { background: linear-gradient(135deg, #EBF4DF, #F5FAF0); border: 1.5px solid #A8CC88; }
+.c-block-title {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+}
+.c-block.common   .c-block-title { color: #3D5C28; border-bottom-color: #C0D8A8; }
+.c-block.personal .c-block-title { color: #8A5C10; border-bottom-color: #DFC090; }
+.c-block.nextstep .c-block-title { color: #3D5C28; border-bottom-color: #A8CC88; }
+
+.c-row { margin-bottom: 7px; }
+.c-row:last-child { margin-bottom: 0; }
+.c-row-head {
+  font-size: 11.5px;
+  font-weight: 700;
+  margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.c-block.common   .c-row-head { color: #2A4018; }
+.c-block.personal .c-row-head { color: #7A4A08; }
+.c-row-body {
+  font-size: 11px;
+  color: #555;
+  line-height: 1.7;
+  padding-left: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.c-bullet {
+  font-size: 11px;
+  color: #555;
+  line-height: 1.65;
+  padding-left: 14px;
+  text-indent: -10px;
+  margin-top: 1px;
+}
+.c-price-pill {
+  display: inline-block;
+  background: #3D5C28;
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 3px 11px;
+  border-radius: 12px;
+  margin-top: 6px;
+}
+.c-footer {
+  padding: 7px 14px 11px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.c-footer-brand { font-size: 11px; color: #888; font-weight: 700; }
+.c-footer-meta { font-size: 10px; color: #BBB; }
+
+/* ---- compact / twocol ---- */
+.card.compact .c-header { padding: 16px 18px 12px; }
+.card.compact .c-name { font-size: 19px; }
+.card.compact .c-subtitle { font-size: 11px; }
+.card.compact .c-body { padding: 9px 9px 3px; }
+.card.compact .c-block { padding: 9px 11px; margin-bottom: 7px; }
+.card.compact .c-row-head { font-size: 10.5px; }
+.card.compact .c-row-body, .card.compact .c-bullet { font-size: 10px; line-height: 1.55; }
+.card.compact .c-block-title { font-size: 9.5px; margin-bottom: 6px; padding-bottom: 4px; }
+
+.card.twocol .c-block.common .c-row-grid,
+.card.twocol .c-block.personal .c-row-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 10px;
+}
+.card.twocol .c-block.common .c-row-grid .c-row,
+.card.twocol .c-block.personal .c-row-grid .c-row {
+  margin-bottom: 0;
+  padding: 6px 8px;
+  background: rgba(255,255,255,0.45);
+  border-radius: 6px;
+}
+
+/* ════════════════════════════════════════
+   ACTIONS
+════════════════════════════════════════ */
+.action-area {
+  width: 100%;
+  max-width: 420px;
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dl-btn {
+  width: 100%;
+  min-height: 54px;
+  padding: 14px;
+  background: #3D5C28;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  transition: background .2s, transform .1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.dl-btn:active { transform: scale(0.98); background: #2E4A1E; }
+.dl-btn:disabled { background: #90B878; }
+.reset-btn {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #C8DDB5;
+  border-radius: 10px;
+  color: #7A9060;
+  font-size: 13px;
+}
+.reset-btn:active { background: #F0F7E8; }
+
+/* ════════════════════════════════════════
+   SETTINGS PANEL
+════════════════════════════════════════ */
+.settings-wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.settings-subtabs {
+  display: flex;
+  gap: 4px;
+  background: #fff;
+  padding: 4px;
+  border-radius: 11px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.subtab {
+  flex: 1;
+  min-width: max-content;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: none;
+  background: none;
+  font-size: 13px;
+  font-weight: 700;
+  color: #7A9060;
+  border-radius: 8px;
+  white-space: nowrap;
+  transition: all .15s;
+}
+.subtab.active { background: #3D5C28; color: #fff; }
+.subpanel { display: none; }
+.subpanel.active { display: block; }
+
+.settings-info {
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #5C7A42;
+  line-height: 1.7;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+}
+.settings-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+  margin-bottom: 10px;
+}
+.settings-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #3D5C28;
+  margin-bottom: 10px;
+  display: flex;
+  gap: 6px;
+}
+.settings-ta {
+  min-height: 90px;
+  resize: vertical;
+  line-height: 1.7;
+  background: #FAFCF7;
+}
+.settings-hint {
+  font-size: 12px;
+  color: #90A880;
+  margin-top: 6px;
+  line-height: 1.55;
+}
+.save-btn {
+  width: 100%;
+  min-height: 52px;
+  padding: 14px;
+  background: #3D5C28;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  border-radius: 11px;
+}
+.save-btn:active { background: #2E4A1E; transform: scale(0.99); }
+.restore-btn, .backup-btn {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #C8DDB5;
+  border-radius: 10px;
+  color: #3D5C28;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+.backup-btn.primary {
+  background: #EBF4E0;
+}
+
+/* ---- Accordion ---- */
+.accordion {
+  border: 1.5px solid #E0EDD5;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+.acc-head {
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #FAFCF7;
+  border: none;
+  font-weight: 700;
+  color: #3D5C28;
+  font-size: 14px;
+  text-align: left;
+}
+.acc-head:active { background: #EBF4E0; }
+.acc-head-left { display: flex; align-items: center; gap: 8px; }
+.acc-head-icon { font-size: 20px; }
+.acc-toggle { font-size: 14px; color: #88A870; transition: transform .2s; }
+.acc-head.open .acc-toggle { transform: rotate(180deg); }
+.acc-body {
+  display: none;
+  padding: 12px 14px 14px;
+  border-top: 1px solid #E0EDD5;
+  background: #fff;
+}
+.acc-body.open { display: block; }
+
+.two-col-row {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.icon-input { text-align: center; font-size: 22px; padding: 8px; }
+.name-input-s { padding: 10px 12px; }
+
+/* ════════════════════════════════════════
+   TOAST
+════════════════════════════════════════ */
+.toast {
+  position: fixed;
+  bottom: calc(22px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20,30,15,0.92);
+  color: #fff;
+  padding: 11px 22px;
+  border-radius: 22px;
+  font-size: 14px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s;
+  z-index: 9999;
+  max-width: 90vw;
+  text-align: center;
+}
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- ═══════ APP BAR ═══════ -->
+<div class="appbar">
+  <span class="appbar-icon">🐣</span>
+  <span class="appbar-title">MRゴルフ フィードバックカード</span>
+  <span class="appbar-sub" id="mode-sub">高速モード</span>
+</div>
+
+<!-- ═══════ TABS ═══════ -->
+<div class="tabbar">
+  <button class="tab active" data-tab="fast"     onclick="switchTab('fast',this)">⚡ 高速モード</button>
+  <button class="tab"        data-tab="detail"   onclick="switchTab('detail',this)">📝 詳細モード</button>
+  <button class="tab"        data-tab="settings" onclick="switchTab('settings',this)">⚙️ 共通設定</button>
+</div>
+
+<!-- ════════════════════════════════════════
+     PANEL: 高速モード
+════════════════════════════════════════ -->
+<div id="panel-fast" class="panel active">
+<div class="layout">
+
+  <!-- LEFT: FAST FORM -->
+  <div class="formbox">
+    <div class="form-label">👤 生徒のお名前（苗字）</div>
+    <input id="f-name" class="txt-input" type="text" placeholder="例：田中"
+           autocomplete="off" autocapitalize="off" spellcheck="false"
+           enterkeyhint="done" inputmode="text"
+           oninput="renderAll()">
+
+    <div style="margin-top:12px;">
+      <div class="form-label">🎫 レッスン名</div>
+      <input id="f-event" class="txt-input" type="text"
+             placeholder="例：道銀レッスン会"
+             autocomplete="off" spellcheck="false"
+             enterkeyhint="done"
+             oninput="renderAll()">
+    </div>
+
+    <hr class="sep">
+
+    <div class="cat-header">
+      <div class="form-label" style="margin:0">⭐ フィードバックカテゴリ（最大3つ）</div>
+      <div class="cat-counter" id="cat-counter">0 / 3</div>
+    </div>
+    <div class="cat-grid" id="cat-grid"></div>
+
+    <div id="comment-area"></div>
+  </div>
+
+  <!-- RIGHT: PREVIEW -->
+  <div class="preview-col">
+    <div class="preview-col-label">📱 プレビュー</div>
+    <div class="card-wrap">
+      <div id="card-fast" class="card"></div>
+      <div class="action-area">
+        <button class="dl-btn" id="dl-btn-fast" onclick="downloadCard('fast')">📥 画像を保存してLINEで送る</button>
+        <button class="reset-btn" onclick="resetFast()">🔄 このフォームをリセット</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PANEL: 詳細モード
+════════════════════════════════════════ -->
+<div id="panel-detail" class="panel">
+<div class="layout">
+
+  <!-- LEFT: DETAIL FORM -->
+  <div class="formbox">
+    <div class="name-row">
+      <div>
+        <div class="form-label">👤 お名前（苗字）</div>
+        <input id="d-name" class="txt-input" type="text" placeholder="例：久末"
+               autocomplete="off" spellcheck="false"
+               enterkeyhint="next" inputmode="text"
+               oninput="renderAll()">
+      </div>
+      <div>
+        <div class="form-label">🔢 回数</div>
+        <input id="d-num" class="num-input" type="number" placeholder="1"
+               min="1" max="99" pattern="[0-9]*"
+               inputmode="numeric" enterkeyhint="done"
+               oninput="renderAll()">
+      </div>
+    </div>
+
+    <div id="detail-sections"></div>
+  </div>
+
+  <!-- RIGHT: PREVIEW (own card clone) -->
+  <div class="preview-col">
+    <div class="preview-col-label">📱 プレビュー</div>
+    <div class="card-wrap">
+      <div id="card-detail" class="card"></div>
+      <div class="action-area">
+        <button class="dl-btn" id="dl-btn-detail" onclick="downloadCard('detail')">📥 画像を保存してLINEで送る</button>
+        <button class="reset-btn" onclick="resetDetail()">🔄 このフォームをリセット</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PANEL: 共通設定
+════════════════════════════════════════ -->
+<div id="panel-settings" class="panel">
+<div class="settings-wrap">
+
+  <div class="settings-subtabs">
+    <button class="subtab active" data-sub="texts"    onclick="switchSub('texts',this)">📝 共通文章</button>
+    <button class="subtab"        data-sub="cats"     onclick="switchSub('cats',this)">⭐ カテゴリ</button>
+    <button class="subtab"        data-sub="detail"   onclick="switchSub('detail',this)">📋 詳細モード</button>
+    <button class="subtab"        data-sub="backup"   onclick="switchSub('backup',this)">💾 バックアップ</button>
+  </div>
+
+  <!-- SUB: 共通文章 -->
+  <div id="sub-texts" class="subpanel active">
+    <div class="settings-info">
+      💡 ここの文章はカードの「TODAY'S LESSON」「NEXT STEP」セクションに反映されます。
+    </div>
+    <div class="settings-card">
+      <div class="settings-card-title">🏌️ ゴルフとは</div>
+      <textarea class="settings-ta" id="set-golf" rows="5" enterkeyhint="done" oninput="renderAll()"></textarea>
+    </div>
+    <div class="settings-card">
+      <div class="settings-card-title">🤝 グリップ（共通解説）</div>
+      <textarea class="settings-ta" id="set-grip" rows="4" enterkeyhint="done" oninput="renderAll()"></textarea>
+    </div>
+    <div class="settings-card">
+      <div class="settings-card-title">🏃 構え（共通解説）</div>
+      <textarea class="settings-ta" id="set-address" rows="4" enterkeyhint="done" oninput="renderAll()"></textarea>
+    </div>
+    <div class="settings-card">
+      <div class="settings-card-title">🌱 NEXT STEP 本文</div>
+      <textarea class="settings-ta" id="set-nextstep" rows="4" enterkeyhint="done" oninput="renderAll()"></textarea>
+    </div>
+    <div class="settings-card">
+      <div class="settings-card-title">🏷️ NEXT STEP バッジ</div>
+      <input class="txt-input" id="set-badge" type="text" placeholder="例：初回体験 1,200円"
+             enterkeyhint="done" oninput="renderAll()">
+      <div class="settings-hint">空欄にするとバッジは表示されません。</div>
+    </div>
+    <button class="save-btn" onclick="saveSettings()">✅ 設定を保存</button>
+  </div>
+
+  <!-- SUB: カテゴリ -->
+  <div id="sub-cats" class="subpanel">
+    <div class="settings-info">
+      💡 高速モードの7カテゴリ（既存5＋その他2）のアイコン・名前・プリセット文を編集できます。<br>
+      プリセットは<b>1行1プリセット</b>。空行は無視されます。
+    </div>
+    <div id="cats-accordion"></div>
+    <button class="save-btn" onclick="saveSettings()">✅ 設定を保存</button>
+  </div>
+
+  <!-- SUB: 詳細モード -->
+  <div id="sub-detail" class="subpanel">
+    <div class="settings-info">
+      💡 詳細モードの3セクションのクイック挿入ボタンを編集できます。<br>
+      記法：<b>「ラベル | 本文」</b> を1行ずつ。パイプ「|」を省略した場合はラベル＝本文。
+    </div>
+    <div id="detail-accordion"></div>
+    <button class="save-btn" onclick="saveSettings()">✅ 設定を保存</button>
+  </div>
+
+  <!-- SUB: バックアップ -->
+  <div id="sub-backup" class="subpanel">
+    <div class="settings-info">
+      💡 カスタマイズした全設定をJSONファイルに書き出し／読み込みできます。<br>
+      機種変更・Safariデータ消去の前に<b>必ずエクスポート</b>してください。
+    </div>
+    <div class="settings-card">
+      <div class="settings-card-title">📤 エクスポート</div>
+      <div class="settings-hint" style="margin-top:0;margin-bottom:10px;">現在の全設定（文章・カテゴリ・プリセット・詳細ボタン）をJSONファイルとして保存します。</div>
+      <button class="backup-btn primary" onclick="exportSettings()">📤 設定をエクスポート（.json）</button>
+    </div>
+    <div class="settings-card">
+      <div class="settings-card-title">📥 インポート</div>
+      <div class="settings-hint" style="margin-top:0;margin-bottom:10px;">以前エクスポートしたJSONファイルから設定を復元します。<b>現在の設定は上書きされます。</b></div>
+      <input type="file" id="import-file" accept=".json,application/json" style="display:none" onchange="importSettings(event)">
+      <button class="backup-btn primary" onclick="document.getElementById('import-file').click()">📥 JSONファイルを選択</button>
+    </div>
+    <div class="settings-card">
+      <div class="settings-card-title">↩️ 初期化</div>
+      <div class="settings-hint" style="margin-top:0;margin-bottom:10px;">全設定を出荷時の初期値に戻します。</div>
+      <button class="restore-btn" onclick="restoreDefaults()">↩️ すべて初期値に戻す</button>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ════════════════════════════════════════════════════
+   DEFAULT DATA
+════════════════════════════════════════════════════ */
+const DEFAULT_TEXTS = {
+  golf:
+`バッグの中の最大14本のクラブを使い、ボールをコース上で運んで最終的にカップへ入れるゲームです。
+自然の地形・天候・木々そのものがコースの一部。その「あるがまま」を楽しめるのがゴルフの醍醐味です。`,
+  grip:
+`左手の指側でしっかり握り、親指と人差し指が作る「V字」が右肩方向を向くように持ちましょう。
+指先で持つ意識が大切です。テイクバック中、この方向に手首が自然に動きます（コック）。`,
+  address:
+`股関節から前傾し、お尻の位置を変えずに体を前に傾けた姿勢が基本です。
+つま先側に体重がかかり、腰は反らせないように。`,
+  nextstep:
+`今日の体験は、ひよコース第1回目を超短縮で行いました！
+より丁寧に、楽しくゴルフを身につけたい方はぜひ続きを一緒に。`,
+  badge: '初回体験 1,200円'
+};
+
+const DEFAULT_CATEGORIES = [
+  { id:'grip',    icon:'🤝', label:'グリップ', presets:[
+    '指先側で握る意識OKです！V字の方向がちゃんと右肩を向いています。',
+    '指1本分末端が余るくらいの位置で持ちましょう。長めに持つイメージです。',
+    '握る力が強すぎています。グローブ越しにクラブを感じるくらいで十分です。',
+    'グリップの形がとても自然でした！この感覚を大切にしてください。'
+  ]},
+  { id:'address', icon:'🏃', label:'構え', presets:[
+    '背中が反りやすい傾向があります。腹筋を締める意識をしましょう。',
+    'ボールに近く構えやすい傾向があります。もう少し離れた位置から構えてみましょう。',
+    'ボールから遠く構えやすい傾向があります。もう一歩近づくと安定します。',
+    '右肩が前に出やすいです。両肩を平行に保つ意識を！',
+    '打っているうちに前屈みになりやすいです。少し胸を張り、背筋を伸ばした気分で！',
+    '構えはOKです！綺麗に前傾できていました。'
+  ]},
+  { id:'axis',    icon:'🔄', label:'軸', presets:[
+    '軸が左右にぶれやすいです！テイクバック中に左足が大きく動かないように！',
+    '軸がアッパー方向に傾きやすいです。右足に重心を残したままスイングしないように！',
+    'テイクバックでのけぞる形になりやすいです。将来的には右脇を締めて上げる練習を！',
+    '軸がとてもよく保てていました！この安定感が「当たる」の基本です。'
+  ]},
+  { id:'swing',   icon:'⛳', label:'スイング', presets:[
+    'リズムよく振れていました！この感覚はとても大事です。',
+    '足の使い方など、振って飛ばせる自力があります！あとは軸を保ちながら振ることです。',
+    'フィニッシュまでしっかり振り切れていて、スイングに勢いを感じます！',
+    '小さいスイングでしっかり当たっていました。次は振り幅を大きくしてみましょう！',
+    '力が入りすぎていました。まずリラックスして、クラブを振り子のように使いましょう。'
+  ]},
+  { id:'overall', icon:'🌟', label:'全体', presets:[
+    '初めてとは思えないスイングでした！これからが本当に楽しみです🏌️',
+    'ゴルフのセンスを感じます！ぜひこの調子で続けていきましょう！',
+    '当たった瞬間の感覚、覚えていますか？あれがゴルフの醍醐味です！',
+    '今日の一打一打が、あなたのゴルフ人生の始まりです。ぜひ続けましょう！',
+    'とても楽しんでいただけたようで嬉しいです！またぜひ一緒に練習しましょう！',
+    '今日から立派なゴルファーです🐣 またお会いできるのを楽しみにしています！'
+  ]},
+  { id:'other1',  icon:'✏️', label:'その他1', presets:[] },
+  { id:'other2',  icon:'💡', label:'その他2', presets:[] }
+];
+
+const DEFAULT_DETAIL_SECTIONS = [
+  { id:'s1', icon:'📌', label:'今回やったこと', buttons:[
+    'アイアン2本素振り|アイアン２本持って連続素振り',
+    'シャフトのしなり|シャフトのしなりを理解する練習',
+    'グリップ|グリップの確認',
+    'アドレス|アドレスの確認',
+    '8番アイアン|８番アイアン基礎打ち',
+    '重心移動|重心移動の練習',
+    'フェイス|フェイスコントロールの確認',
+    'パター|パターの基礎'
+  ]},
+  { id:'s2', icon:'⭐', label:'個人のポイント', buttons:[
+    'グリップOK|指先側で握る意識OK！V字も右肩方向です',
+    '前傾◎|股関節からの前傾が綺麗にできています',
+    '軸◎|テイクバック中の軸がよく安定しています',
+    '振り切れ|フィニッシュまで振り切れています'
+  ]},
+  { id:'s3', icon:'💬', label:'全体コメント', buttons:[
+    '振り切れてます|アドレスからしっかり振り切れています！',
+    '重心移動◎|重心移動も良くなってきています。積み上がりを感じます。',
+    'この調子で|この調子で続けていきましょう！',
+    'すごくいい|すごくいいです！'
+  ]}
+];
+
+/* ════════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════════ */
+const STORE_KEY = 'mr_golf_feedback_settings_v2';
+
+let settings = loadSettings();
+
+let currentMode = 'fast'; // fast | detail
+
+const S_FAST = {
+  name: '',
+  event: '道銀レッスン会',
+  selected: [],           // category ids max 3
+  comments: {}            // {id: comment}
+};
+const S_DETAIL = {
+  name: '',
+  num:  '',
+  // dynamic sections by id from settings.detail
+  items: {}   // { s1: [{title, descs:[]}], ... }
+};
+// Initialize detail items for all sections
+function initDetailItems() {
+  settings.detail.forEach(sec => {
+    if (!S_DETAIL.items[sec.id]) S_DETAIL.items[sec.id] = [{ title:'', descs:[''] }];
+  });
+}
+
+/* ════════════════════════════════════════════════════
+   SETTINGS PERSISTENCE
+════════════════════════════════════════════════════ */
+function defaultSettings() {
+  return {
+    texts:    JSON.parse(JSON.stringify(DEFAULT_TEXTS)),
+    categories: JSON.parse(JSON.stringify(DEFAULT_CATEGORIES)),
+    detail:   JSON.parse(JSON.stringify(DEFAULT_DETAIL_SECTIONS))
+  };
+}
+function loadSettings() {
+  let stored = null;
+  try { stored = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); } catch(e) {}
+  if (!stored) return defaultSettings();
+  // migrate/merge with defaults
+  const d = defaultSettings();
+  return {
+    texts: Object.assign({}, d.texts, stored.texts || {}),
+    categories: Array.isArray(stored.categories) && stored.categories.length ? stored.categories : d.categories,
+    detail: Array.isArray(stored.detail) && stored.detail.length ? stored.detail : d.detail
+  };
+}
+function saveToStorage() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(settings)); } catch(e) {}
+}
+function saveSettings() {
+  // pull current values from all settings inputs into `settings`
+  settings.texts.golf     = v('set-golf').value;
+  settings.texts.grip     = v('set-grip').value;
+  settings.texts.address  = v('set-address').value;
+  settings.texts.nextstep = v('set-nextstep').value;
+  settings.texts.badge    = v('set-badge').value;
+  // category edits come through onchange handlers already mutating settings.categories
+  // detail edits likewise
+  saveToStorage();
+  // Re-render everything that depends on settings
+  renderCats();
+  renderComments();
+  renderDetailForm();
+  renderAll();
+  toast('✅ 設定を保存しました');
+}
+function restoreDefaults() {
+  if (!confirm('すべての設定を初期値に戻しますか？この操作は取り消せません。')) return;
+  settings = defaultSettings();
+  // Reset detail items to match new sections
+  S_DETAIL.items = {};
+  initDetailItems();
+  saveToStorage();
+  populateSettingsUI();
+  renderCats();
+  renderComments();
+  renderDetailForm();
+  renderAll();
+  toast('↩️ 初期値に戻しました');
+}
+
+/* ════════════════════════════════════════════════════
+   EXPORT / IMPORT
+════════════════════════════════════════════════════ */
+function exportSettings() {
+  const data = JSON.stringify(settings, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `mr-golf-settings_${formatDateForFile()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  toast('📤 エクスポートしました');
+}
+function importSettings(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data || typeof data !== 'object') throw new Error('Invalid format');
+      if (!confirm('現在の設定を上書きしてインポートします。続行しますか？')) {
+        event.target.value = '';
+        return;
+      }
+      // Merge with defaults to ensure all required fields exist
+      const d = defaultSettings();
+      settings = {
+        texts:      Object.assign({}, d.texts, data.texts || {}),
+        categories: (Array.isArray(data.categories) && data.categories.length) ? data.categories : d.categories,
+        detail:     (Array.isArray(data.detail) && data.detail.length) ? data.detail : d.detail
+      };
+      S_DETAIL.items = {};
+      initDetailItems();
+      saveToStorage();
+      populateSettingsUI();
+      renderCats();
+      renderComments();
+      renderDetailForm();
+      renderAll();
+      toast('📥 インポートしました');
+    } catch(err) {
+      alert('インポートに失敗しました：JSONファイルが無効です。');
+      console.error(err);
+    } finally {
+      event.target.value = '';
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* ════════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════════ */
+(function init() {
+  initDetailItems();
+  populateSettingsUI();
+  v('f-event').value = S_FAST.event;
+  renderCatsAccordion();
+  renderDetailAccordion();
+  renderCats();
+  renderComments();
+  renderDetailForm();
+  renderAll();
+})();
+
+function v(id) { return document.getElementById(id); }
+
+function populateSettingsUI() {
+  v('set-golf').value     = settings.texts.golf;
+  v('set-grip').value     = settings.texts.grip;
+  v('set-address').value  = settings.texts.address;
+  v('set-nextstep').value = settings.texts.nextstep;
+  v('set-badge').value    = settings.texts.badge || '';
+  renderCatsAccordion();
+  renderDetailAccordion();
+}
+
+/* ════════════════════════════════════════════════════
+   TAB SWITCH
+════════════════════════════════════════════════════ */
+function switchTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  v('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'fast')    { currentMode = 'fast';   v('mode-sub').textContent = '高速モード'; }
+  if (id === 'detail')  { currentMode = 'detail'; v('mode-sub').textContent = '詳細モード'; }
+  if (id === 'settings'){ v('mode-sub').textContent = '共通設定'; }
+  renderAll();
+}
+function switchSub(id, btn) {
+  document.querySelectorAll('.subpanel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.subtab').forEach(t => t.classList.remove('active'));
+  v('sub-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ════════════════════════════════════════════════════
+   FAST MODE — chips
+════════════════════════════════════════════════════ */
+function renderCats() {
+  const grid = v('cat-grid');
+  grid.innerHTML = '';
+  settings.categories.forEach(cat => {
+    const on     = S_FAST.selected.includes(cat.id);
+    const locked = !on && S_FAST.selected.length >= 3;
+    const isEmpty = !cat.presets || cat.presets.length === 0;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'cat-chip' + (on ? ' on' : '') + (locked ? ' locked' : '') + (isEmpty && cat.id.startsWith('other') ? ' empty' : '');
+    btn.innerHTML = `<span class="cat-chip-icon">${esc(cat.icon || '✏️')}</span><span class="cat-chip-name">${esc(cat.label || '—')}</span>`;
+    btn.addEventListener('click', () => { if (!locked) toggleCat(cat.id); });
+    grid.appendChild(btn);
+  });
+  v('cat-counter').textContent = S_FAST.selected.length + ' / 3';
+}
+function toggleCat(id) {
+  const i = S_FAST.selected.indexOf(id);
+  if (i >= 0) { S_FAST.selected.splice(i,1); delete S_FAST.comments[id]; }
+  else {
+    if (S_FAST.selected.length >= 3) return;
+    S_FAST.selected.push(id);
+    S_FAST.comments[id] = '';
+  }
+  renderCats();
+  renderComments();
+  renderAll();
+}
+function renderComments() {
+  const area = v('comment-area');
+  area.innerHTML = '';
+  if (S_FAST.selected.length === 0) {
+    area.innerHTML = '<div class="empty-msg">↑ カテゴリを選んでコメントを追加してください</div>';
+    return;
+  }
+  S_FAST.selected.forEach((id, idx) => {
+    const cat = settings.categories.find(c => c.id === id);
+    if (!cat) return;
+    if (idx > 0) { const hr = document.createElement('hr'); hr.className = 'sep'; area.appendChild(hr); }
+    const block = document.createElement('div');
+    block.className = 'cat-comment-block';
+    const lbl = document.createElement('div');
+    lbl.className = 'cat-comment-label';
+    lbl.textContent = (cat.icon || '') + ' ' + (cat.label || '');
+    block.appendChild(lbl);
+
+    const presets = (cat.presets || []).filter(p => p && p.trim());
+    if (presets.length) {
+      const list = document.createElement('div');
+      list.className = 'preset-list';
+      presets.forEach(text => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'preset-btn' + (S_FAST.comments[id] === text ? ' chosen' : '');
+        b.textContent = text;
+        b.addEventListener('click', () => {
+          S_FAST.comments[id] = (S_FAST.comments[id] === text) ? '' : text;
+          const ta = v('ta-' + id);
+          if (ta) ta.value = S_FAST.comments[id];
+          renderComments();
+          renderAll();
+        });
+        list.appendChild(b);
+      });
+      block.appendChild(list);
+    } else {
+      const hint = document.createElement('div');
+      hint.className = 'preset-hint-empty';
+      hint.textContent = '💡 このカテゴリはプリセット未設定です。下の欄に直接入力、または ⚙️ 設定 → カテゴリで追加してください。';
+      block.appendChild(hint);
+    }
+
+    const ta = document.createElement('textarea');
+    ta.className = 'free-input';
+    ta.id = 'ta-' + id;
+    ta.placeholder = '自由に入力…';
+    ta.setAttribute('enterkeyhint','done');
+    ta.value = S_FAST.comments[id] || '';
+    ta.addEventListener('input', () => { S_FAST.comments[id] = ta.value; renderAll(); });
+    block.appendChild(ta);
+
+    area.appendChild(block);
+  });
+}
+
+/* ════════════════════════════════════════════════════
+   DETAIL MODE — sections, items, presets
+════════════════════════════════════════════════════ */
+function parseButton(line) {
+  // "label|body"  -> {label, body}  / "text" -> {label:text, body:text}
+  const s = String(line || '');
+  const i = s.indexOf('|');
+  if (i < 0) return { label: s.trim(), body: s.trim() };
+  return { label: s.slice(0, i).trim(), body: s.slice(i+1).trim() };
+}
+function renderDetailForm() {
+  const wrap = v('detail-sections');
+  wrap.innerHTML = '';
+  settings.detail.forEach(sec => {
+    if (!S_DETAIL.items[sec.id]) S_DETAIL.items[sec.id] = [{ title:'', descs:[''] }];
+    const box = document.createElement('div');
+    box.className = 'section-form';
+    box.innerHTML = `
+      <div class="section-form-title">${esc(sec.icon || '')} ${esc(sec.label || '')}</div>
+      <div class="quick-select" id="qs-${sec.id}"></div>
+      <div id="${sec.id}-items"></div>
+      <button class="btn-add-item" type="button" onclick="addItem('${sec.id}')">＋ 項目を追加</button>
+    `;
+    wrap.appendChild(box);
+
+    // quick buttons
+    const qs = v('qs-' + sec.id);
+    const btns = (sec.buttons || []).map(parseButton).filter(b => b.label);
+    if (btns.length === 0) {
+      const hint = document.createElement('div');
+      hint.className = 'quick-empty-hint';
+      hint.textContent = '💡 クイック挿入ボタン未設定（⚙️ 設定 → 詳細モード で追加）';
+      qs.appendChild(hint);
+    } else {
+      btns.forEach(b => {
+        const el = document.createElement('button');
+        el.className = 'quick-btn';
+        el.type = 'button';
+        el.textContent = b.label;
+        el.addEventListener('click', () => quickAdd(sec.id, b.body));
+        qs.appendChild(el);
+      });
+    }
+    // items
+    const items = v(sec.id + '-items');
+    S_DETAIL.items[sec.id].forEach((item, idx) => {
+      const d = document.createElement('div');
+      d.className = 'item-form';
+      d.innerHTML = buildItemFormHTML(sec.id, idx, item);
+      items.appendChild(d);
+    });
+  });
+}
+function quickAdd(sid, body) {
+  if (!S_DETAIL.items[sid]) S_DETAIL.items[sid] = [{ title:'', descs:[''] }];
+  const empty = S_DETAIL.items[sid].find(i => !i.title.trim() && i.descs.every(d => !d.trim()));
+  if (empty) {
+    empty.title = body;
+  } else {
+    S_DETAIL.items[sid].push({ title: body, descs: [''] });
+  }
+  renderDetailForm();
+  renderAll();
+}
+function addItem(sid) {
+  if (!S_DETAIL.items[sid]) S_DETAIL.items[sid] = [];
+  S_DETAIL.items[sid].push({ title:'', descs:[''] });
+  renderDetailForm();
+  renderAll();
+}
+function removeItem(sid, idx) {
+  if (S_DETAIL.items[sid].length === 1) S_DETAIL.items[sid][0] = { title:'', descs:[''] };
+  else S_DETAIL.items[sid].splice(idx, 1);
+  renderDetailForm();
+  renderAll();
+}
+function addDesc(sid, idx) {
+  S_DETAIL.items[sid][idx].descs.push('');
+  renderDetailForm();
+  renderAll();
+}
+function removeDesc(sid, idx, di) {
+  if (S_DETAIL.items[sid][idx].descs.length > 1) S_DETAIL.items[sid][idx].descs.splice(di,1);
+  else S_DETAIL.items[sid][idx].descs[0] = '';
+  renderDetailForm();
+  renderAll();
+}
+function buildItemFormHTML(sid, idx, item) {
+  const descsHTML = item.descs.map((desc, di) => `
+    <div class="desc-row">
+      <span class="arrow-icon">→</span>
+      <input class="desc-input" type="text"
+             value="${esc(desc)}" placeholder="説明・補足"
+             autocomplete="off" spellcheck="false"
+             inputmode="text" enterkeyhint="next"
+             oninput="S_DETAIL.items['${sid}'][${idx}].descs[${di}]=this.value; renderAll()">
+      <button class="btn-del-sm" type="button" aria-label="削除" onclick="removeDesc('${sid}',${idx},${di})">✕</button>
+    </div>
+  `).join('');
+  return `
+    <div class="item-title-row">
+      <span class="check-icon">☑</span>
+      <input class="item-title-input" type="text"
+             value="${esc(item.title)}" placeholder="項目名"
+             autocomplete="off" spellcheck="false"
+             inputmode="text" enterkeyhint="next"
+             oninput="S_DETAIL.items['${sid}'][${idx}].title=this.value; renderAll()">
+      <button class="btn-del" type="button" aria-label="削除" onclick="removeItem('${sid}',${idx})">✕</button>
+    </div>
+    ${descsHTML}
+    <button class="btn-add-desc" type="button" onclick="addDesc('${sid}',${idx})">＋ 説明を追加</button>
+  `;
+}
+
+/* ════════════════════════════════════════════════════
+   SETTINGS > CATEGORIES ACCORDION
+════════════════════════════════════════════════════ */
+function renderCatsAccordion() {
+  const wrap = v('cats-accordion');
+  wrap.innerHTML = '';
+  settings.categories.forEach((cat, i) => {
+    const acc = document.createElement('div');
+    acc.className = 'accordion';
+    const presetText = (cat.presets || []).join('\n');
+    acc.innerHTML = `
+      <button class="acc-head" type="button" onclick="toggleAcc(this)">
+        <span class="acc-head-left">
+          <span class="acc-head-icon">${esc(cat.icon || '✏️')}</span>
+          <span>${esc(cat.label || '—')}</span>
+        </span>
+        <span class="acc-toggle">▼</span>
+      </button>
+      <div class="acc-body">
+        <div class="two-col-row">
+          <div>
+            <div class="form-label">アイコン</div>
+            <input class="icon-input" type="text" value="${esc(cat.icon || '')}"
+                   maxlength="4" placeholder="🤝"
+                   oninput="settings.categories[${i}].icon=this.value; renderAll()">
+          </div>
+          <div>
+            <div class="form-label">カテゴリ名</div>
+            <input class="name-input-s" type="text" value="${esc(cat.label || '')}"
+                   placeholder="例：メンタル" enterkeyhint="done"
+                   oninput="settings.categories[${i}].label=this.value; renderAll()">
+          </div>
+        </div>
+        <div class="form-label">プリセット文（1行1プリセット）</div>
+        <textarea class="settings-ta" rows="6"
+                  oninput="settings.categories[${i}].presets=this.value.split('\\n').filter(l=>l.trim()); renderAll()"
+                  placeholder="例：指先側で握る意識OKです！&#10;指1本分末端が余るくらいの位置で...">${esc(presetText)}</textarea>
+        <div class="settings-hint">※ 空行は自動で無視されます。</div>
+      </div>
+    `;
+    wrap.appendChild(acc);
+  });
+}
+
+/* ════════════════════════════════════════════════════
+   SETTINGS > DETAIL ACCORDION
+════════════════════════════════════════════════════ */
+function renderDetailAccordion() {
+  const wrap = v('detail-accordion');
+  wrap.innerHTML = '';
+  settings.detail.forEach((sec, i) => {
+    const acc = document.createElement('div');
+    acc.className = 'accordion';
+    const btnText = (sec.buttons || []).join('\n');
+    acc.innerHTML = `
+      <button class="acc-head" type="button" onclick="toggleAcc(this)">
+        <span class="acc-head-left">
+          <span class="acc-head-icon">${esc(sec.icon || '📋')}</span>
+          <span>${esc(sec.label || '—')}</span>
+        </span>
+        <span class="acc-toggle">▼</span>
+      </button>
+      <div class="acc-body">
+        <div class="two-col-row">
+          <div>
+            <div class="form-label">アイコン</div>
+            <input class="icon-input" type="text" value="${esc(sec.icon || '')}"
+                   maxlength="4" placeholder="📌"
+                   oninput="settings.detail[${i}].icon=this.value; renderAll()">
+          </div>
+          <div>
+            <div class="form-label">セクション名</div>
+            <input class="name-input-s" type="text" value="${esc(sec.label || '')}"
+                   placeholder="例：今回やったこと" enterkeyhint="done"
+                   oninput="settings.detail[${i}].label=this.value; renderAll()">
+          </div>
+        </div>
+        <div class="form-label">クイック挿入ボタン（1行1ボタン）</div>
+        <textarea class="settings-ta" rows="7"
+                  oninput="settings.detail[${i}].buttons=this.value.split('\\n').filter(l=>l.trim()); renderAll()"
+                  placeholder="例：&#10;アイアン2本素振り|アイアン２本持って連続素振り&#10;グリップ|グリップの確認">${esc(btnText)}</textarea>
+        <div class="settings-hint">
+          記法：<b>「ラベル | 本文」</b><br>
+          パイプ「|」省略時は、ラベルと本文が同じになります。
+        </div>
+      </div>
+    `;
+    wrap.appendChild(acc);
+  });
+}
+
+function toggleAcc(btn) {
+  btn.classList.toggle('open');
+  btn.nextElementSibling.classList.toggle('open');
+}
+
+/* ════════════════════════════════════════════════════
+   CARD RENDER (both cards — fast & detail)
+════════════════════════════════════════════════════ */
+function renderAll() {
+  // pull input values
+  S_FAST.name  = v('f-name').value.trim();
+  S_FAST.event = v('f-event').value.trim() || '道銀レッスン会';
+  S_DETAIL.name = v('d-name').value.trim();
+  S_DETAIL.num  = v('d-num').value.trim();
+  renderFastCard();
+  renderDetailCard();
+  autoCompact(v('card-fast'));
+  autoCompact(v('card-detail'));
+}
+
+function renderFastCard() {
+  const name   = S_FAST.name || 'お名前';
+  const event  = S_FAST.event || '道銀レッスン会';
+  const t = settings.texts;
+
+  const personalRows = S_FAST.selected.map(id => {
+    const cat = settings.categories.find(c => c.id === id);
+    if (!cat) return '';
+    const comment = (S_FAST.comments[id] || '').trim();
+    if (!comment) return '';
+    return `
+      <div class="c-row">
+        <div class="c-row-head">${esc(cat.icon || '')} ${esc(cat.label || '')}</div>
+        <div class="c-row-body">${nl2br(esc(comment))}</div>
+      </div>`;
+  }).filter(Boolean).join('');
+
+  const badgeHTML = (t.badge && t.badge.trim())
+    ? `<span class="c-price-pill">${esc(t.badge.trim())}</span>` : '';
+
+  v('card-fast').innerHTML = `
+    <div class="c-header">
+      <div class="c-event-tag">MR GOLF CENTER · ${esc(event)}</div>
+      <div class="c-name">${esc(name)}さん</div>
+      <div class="c-subtitle">フィードバックカード</div>
+    </div>
+    <div class="c-body">
+      <div class="c-block common">
+        <div class="c-block-title">TODAY'S LESSON</div>
+        <div class="c-row-grid">
+          <div class="c-row">
+            <div class="c-row-head">🏌️ ゴルフとは</div>
+            <div class="c-row-body">${nl2br(esc(t.golf))}</div>
+          </div>
+          <div class="c-row">
+            <div class="c-row-head">🤝 グリップ</div>
+            <div class="c-row-body">${nl2br(esc(t.grip))}</div>
+          </div>
+          <div class="c-row">
+            <div class="c-row-head">🏃 構え</div>
+            <div class="c-row-body">${nl2br(esc(t.address))}</div>
+          </div>
+        </div>
+      </div>
+      <div class="c-block personal">
+        <div class="c-block-title">⭐ ${esc(name)}さんへのポイント</div>
+        ${personalRows || '<div style="font-size:11px;color:#C8A870;text-align:center;padding:6px 0;">カテゴリを選んでコメントを追加</div>'}
+      </div>
+      <div class="c-block nextstep">
+        <div class="c-block-title">🌱 NEXT STEP</div>
+        <div class="c-row-body" style="font-size:11.5px;color:#3A5020;line-height:1.7;">${nl2br(esc(t.nextstep))}</div>
+        ${badgeHTML}
+      </div>
+    </div>
+    <div class="c-footer">
+      <span class="c-footer-brand">🐣 MRゴルフセンター</span>
+      <span class="c-footer-meta">${formatDate()} / 北24条駅すぐ</span>
+    </div>
+  `;
+}
+
+function renderDetailCard() {
+  const name = S_DETAIL.name || 'お名前';
+  const num  = S_DETAIL.num  || '？';
+  const t = settings.texts;
+
+  const sectionsHTML = settings.detail.map(sec => {
+    const items = (S_DETAIL.items[sec.id] || []).filter(i => i.title.trim() || i.descs.some(d => d.trim()));
+    if (items.length === 0) return '';
+    const rows = items.map(item => {
+      const descs = item.descs.filter(d => d.trim());
+      const bulletHTML = descs.map(d => `<div class="c-bullet">→ ${esc(d)}</div>`).join('');
+      return `
+        <div class="c-row">
+          ${item.title.trim() ? `<div class="c-row-head">☑ ${esc(item.title)}</div>` : ''}
+          ${bulletHTML}
+        </div>`;
+    }).join('');
+    const blockClass = (sec.id === 's2') ? 'personal' : 'common';
+    const title = (sec.id === 's2')
+      ? `⭐ ${esc(name)}さんのポイント`
+      : `${esc(sec.icon || '')} ${esc(sec.label || '')}`;
+    return `
+      <div class="c-block ${blockClass}">
+        <div class="c-block-title">${title}</div>
+        <div class="c-row-grid">${rows}</div>
+      </div>`;
+  }).join('');
+
+  const hasContent = !!sectionsHTML;
+  const badgeHTML = (t.badge && t.badge.trim())
+    ? `<span class="c-price-pill">${esc(t.badge.trim())}</span>` : '';
+
+  v('card-detail').innerHTML = `
+    <div class="c-header">
+      <div class="c-event-tag">MR GOLF CENTER · ひよコース</div>
+      <div class="c-name">${esc(name)}さん ヒヨコース${esc(num)}回目</div>
+      <div class="c-subtitle">フィードバックカード</div>
+    </div>
+    <div class="c-body">
+      ${sectionsHTML}
+      ${!hasContent ? '<div class="c-block common"><div style="font-size:12px;color:#C8A870;text-align:center;padding:10px 0;">項目を入力するとここに表示されます</div></div>' : ''}
+      <div class="c-block nextstep">
+        <div class="c-block-title">🌱 NEXT STEP</div>
+        <div class="c-row-body" style="font-size:11.5px;color:#3A5020;line-height:1.7;">${nl2br(esc(t.nextstep))}</div>
+        ${badgeHTML}
+      </div>
+    </div>
+    <div class="c-footer">
+      <span class="c-footer-brand">🐣 MRゴルフセンター</span>
+      <span class="c-footer-meta">${formatDate()} / 北24条駅すぐ</span>
+    </div>
+  `;
+}
+
+/* ════════════════════════════════════════════════════
+   長尺対策: compact / twocol
+════════════════════════════════════════════════════ */
+function autoCompact(card) {
+  if (!card) return;
+  card.classList.remove('compact','twocol');
+  // count items
+  let itemCount = 0;
+  if (card.id === 'card-detail') {
+    settings.detail.forEach(sec => {
+      (S_DETAIL.items[sec.id] || []).forEach(i => {
+        if (i.title.trim()) itemCount++;
+        itemCount += i.descs.filter(d => d.trim()).length;
+      });
+    });
+  } else {
+    itemCount = S_FAST.selected.filter(id => (S_FAST.comments[id]||'').trim()).length;
+  }
+  if (itemCount >= 8) card.classList.add('compact');
+  if (itemCount >= 10) card.classList.add('twocol');
+  requestAnimationFrame(() => {
+    const h = card.offsetHeight;
+    if (h > 820 && !card.classList.contains('compact')) card.classList.add('compact');
+    if (h > 1150 && !card.classList.contains('twocol')) card.classList.add('twocol');
+  });
+}
+
+/* ════════════════════════════════════════════════════
+   DOWNLOAD
+════════════════════════════════════════════════════ */
+async function downloadCard(sourceMode) {
+  const btn = v('dl-btn-' + sourceMode);
+  const original = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '⏳ 生成中…';
+  try {
+    await new Promise(r => setTimeout(r, 50));
+    const card = v('card-' + sourceMode);
+    const canvas = await html2canvas(card, {
+      scale: 3,
+      backgroundColor: '#ffffff',
+      logging: false,
+      useCORS: true,
+      windowWidth: document.documentElement.offsetWidth
+    });
+    const filename = buildFilename(sourceMode);
+    const a = document.createElement('a');
+    a.download = filename;
+    a.href = canvas.toDataURL('image/png');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    toast('✅ 保存しました！長押しで写真に追加 → LINE送信');
+  } catch(err) {
+    toast('⚠️ 生成に失敗しました');
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = original;
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   FILENAME & DATE UTILS
+════════════════════════════════════════════════════ */
+function buildFilename(mode) {
+  const date = formatDateForFile();
+  let name = '生徒';
+  let lesson = 'ゴルフレッスン';
+  if (mode === 'fast') {
+    name   = S_FAST.name   || '生徒';
+    lesson = S_FAST.event  || '道銀レッスン会';
+  } else {
+    name   = S_DETAIL.name || '生徒';
+    const num = S_DETAIL.num || '';
+    lesson = 'ヒヨコース' + (num ? (num + '回目') : '');
+  }
+  const safe = s => String(s).replace(/[\\\/:*?"<>|]/g, '').replace(/\s+/g,'');
+  return `${safe(name)}_${safe(lesson)}_${date}.png`;
+}
+function formatDate() {
+  const d = new Date();
+  return `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())}`;
+}
+function formatDateForFile() {
+  const d = new Date();
+  return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`;
+}
+function pad(n) { return String(n).padStart(2,'0'); }
+
+/* ════════════════════════════════════════════════════
+   RESET
+════════════════════════════════════════════════════ */
+function resetFast() {
+  if (!confirm('高速モードのフォームをリセットしますか？')) return;
+  v('f-name').value = '';
+  S_FAST.name = '';
+  S_FAST.selected = [];
+  S_FAST.comments = {};
+  renderCats(); renderComments(); renderAll();
+  toast('🔄 リセットしました');
+}
+function resetDetail() {
+  if (!confirm('詳細モードのフォームをリセットしますか？')) return;
+  v('d-name').value = ''; v('d-num').value = '';
+  S_DETAIL.name = ''; S_DETAIL.num = '';
+  settings.detail.forEach(sec => {
+    S_DETAIL.items[sec.id] = [{ title:'', descs:[''] }];
+  });
+  renderDetailForm(); renderAll();
+  toast('🔄 リセットしました');
+}
+
+/* ════════════════════════════════════════════════════
+   UTILS
+════════════════════════════════════════════════════ */
+function esc(s) {
+  return String(s==null?'':s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function nl2br(s) { return s.replace(/\n/g,'<br>'); }
+function toast(msg) {
+  const t = v('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove('show'), 3200);
+}
+</script>
+</body>
+</html>
